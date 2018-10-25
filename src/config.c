@@ -112,6 +112,11 @@ struct Keyword listener_stanza_grammar[] = {
             (int(*)(void *, char *))accept_listener_reuseport,
             NULL,
             NULL},
+    { "ipv6_v6only",
+            NULL,
+            (int(*)(void *, char *))accept_listener_ipv6_v6only,
+            NULL,
+            NULL},
     { "table",
             NULL,
             (int(*)(void *, char *))accept_listener_table_name,
@@ -406,6 +411,8 @@ static int
 end_backend(struct Table *table, struct Backend *backend) {
     /* TODO check backend */
 
+    table->use_proxy_header = table->use_proxy_header ||
+                              backend->use_proxy_header;
     add_backend(&table->backends, backend);
 
     return 1;

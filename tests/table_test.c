@@ -11,6 +11,7 @@ static void test_single_entry_table();
 static void append_entry(struct Table *, const char *, const char *);
 static void add_new_table(struct Table_head *, const char *, const char **);
 static void test_add_table();
+static void test_tables_reload();
 static int count_tables(const struct Table_head *);
 
 
@@ -18,6 +19,7 @@ int main() {
     test_empty_table();
     test_single_entry_table();
     test_add_table();
+    test_tables_reload();
 }
 
 static void
@@ -34,8 +36,9 @@ test_empty_table() {
     assert(name != table->name);
 
     const char *server_query = "example.com";
-    assert(table_lookup_server_address(table, server_query,
-            strlen(server_query)) == NULL);
+    struct LookupResult result = table_lookup_server_address(table,
+            server_query, strlen(server_query));
+    assert(result.address == NULL);
 
     table_ref_put(table);
 }
@@ -70,8 +73,9 @@ test_single_entry_table() {
     init_table(table);
 
     const char *server_query = "example.com";
-    assert(table_lookup_server_address(table, server_query,
-            strlen(server_query)) != NULL);
+    struct LookupResult result = table_lookup_server_address(table,
+            server_query, strlen(server_query));
+    assert(result.address != NULL);
 
     table_ref_put(table);
 }

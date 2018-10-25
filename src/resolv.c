@@ -82,7 +82,7 @@ struct ResolvQuery {
 };
 
 
-static int default_resolv_mode = 1;
+static int default_resolv_mode = 1 /* RESOLV_MODE_IPV4_ONLY */;
 static struct ev_io resolv_io_watcher;
 static struct ev_timer resolv_timeout_watcher;
 
@@ -169,7 +169,8 @@ resolv_query(const char *hostname, int mode,
     cb_data->client_cb = client_cb;
     cb_data->client_free_cb = client_free_cb;
     cb_data->client_cb_data = client_cb_data;
-    cb_data->resolv_mode = mode > 0 ? mode : default_resolv_mode;
+    cb_data->resolv_mode = mode != RESOLV_MODE_DEFAULT ?
+                           mode : default_resolv_mode;
     memset(cb_data->queries, 0, sizeof(cb_data->queries));
     cb_data->response_count = 0;
     cb_data->responses = NULL;
@@ -242,7 +243,7 @@ dns_query_v4_cb(struct dns_ctx *ctx, struct dns_rr_a4 *result, void *data) {
         info("resolv: %s\n", dns_strerror(dns_status(ctx)));
     } else if (result->dnsa4_nrr > 0) {
         struct Address **new_responses = realloc(cb_data->responses,
-                (cb_data->response_count + result->dnsa4_nrr) *
+                (cb_data->response_count + (size_t)result->dnsa4_nrr) *
                     sizeof(struct Address *));
         if (new_responses == NULL) {
             err("Failed to allocate memory for additional DNS responses");
@@ -282,7 +283,7 @@ dns_query_v6_cb(struct dns_ctx *ctx, struct dns_rr_a6 *result, void *data) {
         info("resolv: %s\n", dns_strerror(dns_status(ctx)));
     } else if (result->dnsa6_nrr > 0) {
         struct Address **new_responses = realloc(cb_data->responses,
-                (cb_data->response_count + result->dnsa6_nrr) *
+                (cb_data->response_count + (size_t)result->dnsa6_nrr) *
                     sizeof(struct Address *));
         if (new_responses == NULL) {
             err("Failed to allocate memory for additional DNS responses");
